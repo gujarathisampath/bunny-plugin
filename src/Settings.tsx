@@ -15,7 +15,7 @@ export default () => {
     return (
 
     <ScrollView>
-    <FormSection>
+    <FormSection title = "Settings">
         <FormSwitchRow
                 label="Enable profile effects"
                 subLabel="If enabled, profile effects will load up."
@@ -58,8 +58,11 @@ export default () => {
                 value={storage.sw_badges}
                 onValueChange={(value: boolean) => storage.sw_badges = value}
         />
+    </FormSection>
+    <FormSection title = "Extras">
         <FormRow
             label = "Discord Server"
+            subLabel = "Join to Discord server for request profile avatar/banner/badge and choose decorations and effects"
             leading={<FormRow.Icon source={getAssetIDByName("Discord")} />}
             trailing={FormRow.Arrow}
             onPress={() => url.openDeeplink("https://discord.gg/ffmkewQ4R7")}
