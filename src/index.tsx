@@ -1,23 +1,26 @@
-import { logger } from "@vendetta";
+import { logger, version } from "@vendetta";
 import { safeFetch } from "@vendetta/utils";
 import { showToast } from "@vendetta/ui/toasts";
 import Settings from "./Settings";
 import { AvatarDecorationUtils, ImageResolver, UserProfileStore, UserStore, getUserAvatar, getUserBannerURL, profileBadges } from "./lib/userProps";
 import { after, instead } from "@vendetta/patcher";
-import { BadgeProps, CustomBadges, UserProfile, UserProfileData } from "./lib/types";
-import { API_URL, BASE_URL, SKU_ID, SKU_ID_DISCORD } from "./lib/constants";
-import { ReactNative as RN, React, ReactNative } from "@vendetta/metro/common";
+import { BadgeProps, CustomBadges, FakeProfileData, UserProfile, UserProfileData } from "./lib/types";
+import { API_URL, BASE_URL, SKU_ID, SKU_ID_DISCORD, VERSION } from "./lib/constants";
+import { ReactNative as RN, React, ReactNative, toasts } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin";
 import { BadgeComponent } from "./ui/badgeComponent";
 const { View } = RN;
 
 let data = {} as Record<string, UserProfileData>;
+let fakeProfileData:FakeProfileData = {}; // {version,reloadInterval,name}
 let patches = [];
 
 export const fetchData = async () => {
     try {
+        fakeProfileData = await (await safeFetch(BASE_URL+"/fakeProfile", { cache: "no-store" })).json();
         data = await (await safeFetch(API_URL, { cache: "no-store" })).json();
         return data;
+        
     } catch (e) {
         logger.error("Failed to fetch fakeProfile data", e);
     }
@@ -56,7 +59,10 @@ function decode(bio: string): Array<number> | null {
 
 export const onLoad = async () => {
     await fetchData()
-    if (!data) return showToast("Failed to load DB")
+    
+    if (!data) return showToast("Failed to load fakeProfile data.")
+    if (fakeProfileData?.version != VERSION) return showToast("A new version of the fakeProfile plugin is available. Please update as soon as possible.")
+    
         patches.push(
             after("getUserProfile", UserProfileStore, (_args, profile: UserProfile | undefined) => {
                 if(!profile) return profile;
@@ -168,10 +174,12 @@ export const onLoad = async () => {
                     image: badge.icon,
                     });
                 });
-
             })
-            
+    
         )
+        setInterval(async () => {
+            await fetchData();
+        }, fakeProfileData?.reloadInterval);
 
 }
 

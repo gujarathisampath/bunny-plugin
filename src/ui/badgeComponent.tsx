@@ -1,5 +1,6 @@
 import { ReactNative as RN, stylesheet, toasts, React } from "@vendetta/metro/common";
 import { BadgeComponents } from "../lib/types";
+import { showToast } from "@vendetta/ui/toasts";
 
 const { View, Image, TouchableOpacity } = RN;
 
@@ -25,7 +26,7 @@ export const BadgeComponent = ({ name, image, size, margin, custom }: BadgeCompo
             return (custom)
         } else {
             return (
-                <TouchableOpacity onPress={() => toasts.open({ content: name, source: { uri: image } })}>
+                <TouchableOpacity onPress={() =>showToast(name)}>
                     <Image style={styles.img} source={{ uri: image }} />
                 </TouchableOpacity>
             )

@@ -84,3 +84,9 @@ export interface CustomBadges {
     icon: string;
     description: string;
 }
+
+export interface FakeProfileData {
+    plugin?: string;
+    version?: string;
+    reloadInterval?: number;
+}
