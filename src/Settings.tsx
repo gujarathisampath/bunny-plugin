@@ -62,7 +62,7 @@ export default () => {
     <FormSection title = "Extras">
         <FormRow
             label = "Discord Server"
-            subLabel = "Join to Discord server for request profile avatar/banner/badge and choose decorations and effects"
+            subLabel = "Join to Discord server for request profile avatar/banner/badge and choose decorations and effects."
             leading={<FormRow.Icon source={getAssetIDByName("Discord")} />}
             trailing={FormRow.Arrow}
             onPress={() => url.openDeeplink("https://discord.gg/ffmkewQ4R7")}
