@@ -80,13 +80,27 @@ export const onLoad = async () => {
         );
         patches.push(
         after("getUserAvatarURL", getUserAvatar, ([{ id }, animate]) =>{
-            if (data[id] && data[id]?.avatar && storage.sw_avatars)  return data[id]?.avatar?.toString();            ;
+            if (data[id] && data[id]?.avatar && storage.sw_avatars){
+                if(animate){
+                    return data[id]?.avatar?.toString();
+                } else {
+                    const parsedUrl = new URL(data[id]?.avatar?.toString());
+                    const image_name = parsedUrl.pathname.split("/").pop()?.replace("a_", "");
+                    return BASE_URL+"/image/"+image_name;
+                }
+            };
         }));
         patches.push(
         after("getUserAvatarSource", getUserAvatar, ([{ id }, animate], ret) => {
-            if (data[id] && data[id]?.avatar && storage.sw_avatars) {
-            return { uri: data[id]?.avatar?.toString() };
-            }
+            if (data[id] && data[id]?.avatar && storage.sw_avatars){
+                if(animate){
+                    return data[id]?.avatar?.toString();
+                } else {
+                    const parsedUrl = new URL(data[id]?.avatar?.toString());
+                    const image_name = parsedUrl.pathname.split("/").pop()?.replace("a_", "");
+                    return BASE_URL+"/image/"+image_name;
+                }
+            };
         }));
         patches.push(after("getUserBannerURL", getUserBannerURL, ([user]) => {
             const customBanner = Object.entries(data).find(userId => userId[0] === user?.id)
