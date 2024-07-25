@@ -80,25 +80,27 @@ export const onLoad = async () => {
         );
         patches.push(
         after("getUserAvatarURL", getUserAvatar, ([{ id }, animate]) =>{
-            if (data[id] && data[id]?.avatar && storage.sw_avatars){
-                if(animate){
-                    return data[id]?.avatar?.toString();
+            if (data[id] && data[id].avatar && storage.sw_avatars) {
+                const avatarURL = data[id].avatar.toString();
+                if (animate) {
+                    return avatarURL;
                 } else {
-                    const parsedUrl = new URL(data[id]?.avatar?.toString());
-                    const image_name = parsedUrl.pathname.split("/").pop()?.replace("a_", "");
-                    return BASE_URL+"/image/"+image_name;
+                    const parsedUrl = new URL(avatarURL);
+                    const imageName = parsedUrl.pathname.split("/").pop().replace("a_", "");
+                    return `${BASE_URL}/image/${imageName}`;
                 }
             };
         }));
         patches.push(
         after("getUserAvatarSource", getUserAvatar, ([{ id }, animate], ret) => {
-            if (data[id] && data[id]?.avatar && storage.sw_avatars){
-                if(animate){
-                    return data[id]?.avatar?.toString();
+            if (data[id] && data[id].avatar && storage.sw_avatars) {
+                const avatarURL = data[id].avatar.toString();
+                if (animate) {
+                    return { uri: avatarURL };
                 } else {
-                    const parsedUrl = new URL(data[id]?.avatar?.toString());
-                    const image_name = parsedUrl.pathname.split("/").pop()?.replace("a_", "");
-                    return BASE_URL+"/image/"+image_name;
+                    const parsedUrl = new URL(avatarURL);
+                    const imageName = parsedUrl.pathname.split("/").pop().replace("a_", "");
+                    return { uri: `${BASE_URL}/image/${imageName}` };
                 }
             };
         }));
