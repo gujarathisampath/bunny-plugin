@@ -7,3 +7,4 @@ export const AvatarDecorationUtils = findByProps('isAnimatedAvatarDecoration');
 export const profileBadges = findByName("ProfileBadges", false);
 export const UserProfileStore = findByStoreName("UserProfileStore");
 export const getUserAvatar = findByProps("getUserAvatarURL", "getUserAvatarSource");
+export const getProfileEffectStore = findByProps("getProfileEffectById");
