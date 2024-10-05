@@ -4,7 +4,9 @@
 		"build": "node build.mjs"
 	},
 	"dependencies": {
-		"@swc/helpers": "^0.4.14"
+		"@swc/helpers": "^0.4.14",
+		"http-server": "^14.1.1",
+		"react-native": "^0.75.2"
 	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^24.0.0",

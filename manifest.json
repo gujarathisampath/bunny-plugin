@@ -1,0 +1,14 @@
+{
+    "name": "fakeProfile",
+    "description": "A plugin that allows you to get profile effects, avatar decorations, profile theme, custom badges, animated banner and avatar without nitro.",
+    "authors": [
+        {
+            "name": "Sampath",
+            "id": "984015688807100419"
+        }
+    ],
+    "main": "src/index.tsx",
+    "vendetta": {
+        "icon": "ic_badge_staff"
+    }
+}
