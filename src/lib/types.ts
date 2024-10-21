@@ -1,8 +1,9 @@
 export interface Badge {
-    asset: string;
     description: string;
     icon: string;
     link?: string;
+    id?: string;
+    badge_id?: string;
 }
 
 export interface DecorationData {

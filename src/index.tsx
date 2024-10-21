@@ -49,8 +49,10 @@ export const fetchData = async () => {
       await safeFetch(BASE_URL + "/fakeProfile", { cache: "no-store" })
     ).json();
     data = await (await safeFetch(API_URL, { cache: "no-store" })).json();
-    CustomEffects = await (await safeFetch(BASE_URL + "/profile-effects", { cache: "no-store" })).json();
-    return data
+    CustomEffects = await (
+      await safeFetch(BASE_URL + "/profile-effects", { cache: "no-store" })
+    ).json();
+    return data;
   } catch (e) {
     logger.error("Failed to fetch fakeProfile data", e);
   }
@@ -165,7 +167,7 @@ export const onLoad = async () => {
     after("getProfileEffectById", getProfileEffectStore, (skuId, effects) => {
       return CustomEffects[skuId];
     })
-  )
+  );
   patches.push(
     after("getUser", UserStore, (_, user) => {
       if (
@@ -222,7 +224,7 @@ export const onLoad = async () => {
       }
     )
   );
-  
+
   patches.push(
     after("default", profileBadges, (args, res) => {
       let mem = res;
