@@ -33,6 +33,7 @@ import {
   React,
   ReactNative,
   toasts,
+  url,
 } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin";
 import { BadgeComponent } from "./ui/badgeComponent";
@@ -225,75 +226,26 @@ export const onLoad = async () => {
     )
   );
 
-  patches.push(
-    after("default", profileBadges, (args, res) => {
-      let mem = res;
-      const user = args[0]?.user;
-      const usersBadges = data[user?.id]?.badges;
-      if (!user) return;
-      if (!storage.sw_badges) return;
-      if (!usersBadges) return;
-      const style = mem?.props?.style;
-      if (!mem) {
-        mem = (
-          <View
-            style={[
-              style,
-              {
-                flexDirection: "row",
-                flexWrap: "wrap",
-                alignItems: "flex-end",
-                justifyContent: "flex-end",
-                paddingVertical: 2,
-              },
-            ]}
-            accessibilityRole={"list"}
-            accessibilityLabel={"User Badges"}
-          />
-        );
+  const propHolder = {} as Record<string, any>;
 
-        mem.props.children = [];
-      }
-      const pushBadge = ({ name, image, custom = false }: BadgeProps) => {
-        const RenderableBadge = () => (
-          <BadgeComponent
-            custom={custom}
-            name={name}
-            image={image}
-            size={
-              Array.isArray(style)
-                ? style?.find((r) => r.paddingVertical && r.paddingHorizontal)
-                  ? 16
-                  : 22
-                : 16
-            }
-            margin={Array.isArray(style) ? 4 : 6}
-          />
-        );
-        const positionleft = true;
-        if (mem?.props?.badges)
-          positionleft
-            ? (mem.props.badges = [<RenderableBadge />, ...mem.props.badges])
-            : (mem.props.badges = [...mem.props.badges, <RenderableBadge />]);
-        else
-          positionleft
-            ? (mem.props.children = [
-                <RenderableBadge />,
-                ...mem.props.children,
-              ])
-            : (mem.props.children = [
-                ...mem.props.children,
-                <RenderableBadge />,
-              ]);
-      };
-      usersBadges.map((badge: CustomBadges) => {
-        pushBadge({
-          name: badge.description,
-          image: badge.icon,
-        });
-      });
+  patches.push(
+    after("default", profileBadges, ([user], ret) => {
+      if (!storage.sw_badges) return ret;
+      const userId = user?.userId;
+      const usersBadges = data[userId]?.badges;
+      if (!usersBadges?.length) return ret;
+
+      return [
+        ...usersBadges.map((badge, i) => ({
+          id: `fakeprofile-${userId}-${i}`,
+          icon: badge.icon,
+          description: badge.description,
+        })),
+        ...(Array.isArray(ret) ? ret : []),
+      ];
     })
   );
+
   setInterval(async () => {
     await fetchData();
   }, fakeProfileData?.reloadInterval);

@@ -6,6 +6,11 @@ export interface Badge {
     badge_id?: string;
 }
 
+export interface UserBadge {
+    label: string;
+    url: string;
+}
+
 export interface DecorationData {
     asset: string;
     skuId: string;
