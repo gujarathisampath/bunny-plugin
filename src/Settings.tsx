@@ -5,14 +5,17 @@ import { fetchData } from "./index";
 import { showToast } from "@vendetta/ui/toasts";
 import { useProxy } from "@vendetta/storage";
 import { storage } from "@vendetta/plugin";
-import { showInputAlert } from "@vendetta/ui/alerts";
-import ColorSelector from "./components/ColorSelector";
+import { showCustomAlert, showInputAlert } from "@vendetta/ui/alerts";
+import ColorPickerModal from "./components/ColorPickerModal";
 
-const { ScrollView, TextInput, View } = General;
-const { FormSection, FormRow, FormSwitchRow, FormRadioRow } = Forms;
+const { ScrollView, } = General;
+const { FormSection, FormRow, FormSwitchRow } = Forms;
 
 export default () => {
   useProxy(storage);
+  
+  const [primaryModalVisible, setPrimaryModalVisible] = React.useState(false);
+  const [accentModalVisible, setAccentModalVisible] = React.useState(false);
 
   const encode = (primary: number, accent: number): string => {
     const message = `[#${primary.toString(16).padStart(6, "0")},#${accent
@@ -96,22 +99,14 @@ export default () => {
         />
       </FormSection>
       <FormSection title="3y3 Colors">
+        
         <FormRow
           label="Primary Color"
           subLabel={`Current: ${storage.sw_primary || "none"}`}
           leading={
             <FormRow.Icon source={getAssetIDByName("ic_message_edit")} />
           }
-          onPress={() => {
-            showInputAlert({
-              title: "Enter Primary Color",
-              placeholder: "ff0000",
-              initialValue: storage.sw_primary,
-              onConfirm: (value) => {
-                storage.sw_primary = value;
-              },
-            });
-          }}
+          onPress={() => setPrimaryModalVisible(true)}
         />
         <FormRow
           label="Accent Color"
@@ -119,16 +114,7 @@ export default () => {
           leading={
             <FormRow.Icon source={getAssetIDByName("ic_message_edit")} />
           }
-          onPress={() => {
-            showInputAlert({
-              title: "Enter Accent Color",
-              placeholder: "00ff00",
-              initialValue: storage.sw_accent,
-              onConfirm: (value) => {
-                storage.sw_accent = value;
-              },
-            });
-          }}
+          onPress={() => setAccentModalVisible(true)}
         />
         <FormRow
           label="Copy 3y3"
@@ -165,6 +151,28 @@ export default () => {
           }}
         />
       </FormSection>
+      
+      <ColorPickerModal
+        visible={primaryModalVisible}
+        title="Select Primary Color"
+        initialValue={storage.sw_primary || ""}
+        onConfirm={(value) => {
+          storage.sw_primary = value;
+          setPrimaryModalVisible(false);
+        }}
+        onCancel={() => setPrimaryModalVisible(false)}
+      />
+      
+      <ColorPickerModal
+        visible={accentModalVisible}
+        title="Select Accent Color"
+        initialValue={storage.sw_accent || ""}
+        onConfirm={(value) => {
+          storage.sw_accent = value;
+          setAccentModalVisible(false);
+        }}
+        onCancel={() => setAccentModalVisible(false)}
+      />
     </ScrollView>
   );
 };
