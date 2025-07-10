@@ -121,10 +121,10 @@ export default function ColorPickerModal({
                     minWidth: 80
                 }]}
                 value={selectedColor}
+                placeholder="000000"
+                placeholderTextColor="#ffffff"
                 onChangeText={setSelectedColor}
-                placeholderTextColor="#666"
                 maxLength={6}
-                selectionColor="#ffffff"
             />
             </View>
 
