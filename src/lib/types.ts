@@ -11,11 +11,6 @@ export interface UserBadge {
     url: string;
 }
 
-export interface DecorationData {
-    asset: string;
-    skuId: string;
-    animated: boolean;
-}
 export interface AvatarDecoration {
     asset: string;
     skuId: string;
@@ -23,11 +18,11 @@ export interface AvatarDecoration {
 }
 
 export interface UserProfileData {
-    profile_effect: string;
+    profileEffectId: string;
     banner: string;
     avatar: string;
-    badges: Badge[];
-    decoration: DecorationData;
+    decoration: string;
+    nameplate: string;
 }
 
 export interface Colors {
@@ -72,24 +67,21 @@ export interface UserProfile {
     userId: string;
 }
 
+
 export interface BadgeProps {
     name: string;
-    image: string;
-    custom?: any;
-  }
+    tooltip: string;
+    badge: string;
+}
   
 export interface BadgeComponents {
-name: string;
-image: string;
-size: number;
-margin: number;
-custom?: object;
+    name: string;
+    image: string;
+    size: number;
+    margin: number;
+    custom?: object;
 }
 
-export interface CustomBadges {
-    icon: string;
-    description: string;
-}
 
 export interface FakeProfileData {
     plugin?: string;

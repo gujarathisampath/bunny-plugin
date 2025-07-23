@@ -14,9 +14,8 @@ import {
 } from "./lib/userProps";
 import { after, instead } from "@vendetta/patcher";
 import {
+  AvatarDecoration,
   BadgeProps,
-  CustomBadges,
-  FakeProfileData,
   ProfileEffectConfig,
   UserProfile,
   UserProfileData,
@@ -26,33 +25,44 @@ import {
   BASE_URL,
   SKU_ID,
   SKU_ID_DISCORD,
-  VERSION,
 } from "./lib/constants";
 import {
   ReactNative as RN,
-  React,
   ReactNative,
-  toasts,
-  url,
 } from "@vendetta/metro/common";
 import { storage } from "@vendetta/plugin";
 import { BadgeComponent } from "./ui/badgeComponent";
+import { getAssetIDByName } from "@vendetta/ui/assets";
 const { View } = RN;
 
 let data = {} as Record<string, UserProfileData>;
 let CustomEffects = {} as Record<string, ProfileEffectConfig>;
-let fakeProfileData: FakeProfileData = {}; // {version,reloadInterval,name}
 let patches = [];
+let userBadges = [] as Record<string, BadgeProps[]>;
+let decorationsData = {} as Record<string, AvatarDecoration>;
 
 export const fetchData = async () => {
   try {
-    fakeProfileData = await (
-      await safeFetch(BASE_URL + "/fakeProfile", { cache: "no-store" })
-    ).json();
     data = await (await safeFetch(API_URL, { cache: "no-store" })).json();
     CustomEffects = await (
       await safeFetch(BASE_URL + "/profile-effects", { cache: "no-store" })
     ).json();
+    userBadges = await (
+      await safeFetch(BASE_URL + "/badges", { cache: "no-store" })
+    ).json();
+    const decors = await (
+      await safeFetch(BASE_URL + "/decorations", { cache: "no-store" })
+    ).json();
+    decorationsData = Object.fromEntries(
+      decors.map((decor: AvatarDecoration) => [
+        decor.asset,
+        {
+          asset: decor.asset,
+          skuId: decor.skuId,
+          animated: decor.animated,
+        },
+      ])
+    );
     return data;
   } catch (e) {
     logger.error("Failed to fetch fakeProfile data", e);
@@ -95,11 +105,6 @@ function decode(bio: string): Array<number> | null {
 export const onLoad = async () => {
   await fetchData();
 
-  if (fakeProfileData?.version != VERSION)
-    return showToast(
-      "A new version of the fakeProfile plugin is available. Please update as soon as possible."
-    );
-
   patches.push(
     after(
       "getUserProfile",
@@ -107,9 +112,9 @@ export const onLoad = async () => {
       (_args, profile: UserProfile | undefined) => {
         if (!profile) return profile;
         const colors = decode(profile.bio);
-        if (data[profile.userId]?.profile_effect && storage.sw_effects) {
+        if (data[profile.userId]?.profileEffectId && storage.sw_effects) {
           profile.profileEffectId = profile.profileEffectID =
-            data[profile.userId]?.profile_effect;
+            data[profile.userId]?.profileEffectId;
           profile.premiumType = 2;
         }
         if (colors && storage.sw_themes) {
@@ -178,11 +183,11 @@ export const onLoad = async () => {
         storage.sw_decorations
       ) {
         const decoration = data[user?.id];
-
         if (decoration?.decoration) {
+          const decor = decorationsData[decoration.decoration];
           user.avatarDecoration = {
-            asset: decoration.decoration.asset,
-            skuId: decoration?.decoration.skuId,
+            asset: decor.asset,
+            skuId: decor?.skuId,
           };
         }
         user.avatarDecorationData = user.avatarDecoration;
@@ -193,6 +198,7 @@ export const onLoad = async () => {
   patches.push(
     instead("getAvatarDecorationURL", ImageResolver, (args, orig) => {
       const [{ avatarDecoration, canAnimate }] = args;
+      
       if (avatarDecoration?.skuId === SKU_ID) {
         const parts = avatarDecoration.asset.split("_");
         if (!canAnimate && parts[0] === "a") parts.shift();
@@ -232,14 +238,14 @@ export const onLoad = async () => {
     after("default", profileBadges, ([user], ret) => {
       if (!storage.sw_badges) return ret;
       const userId = user?.userId;
-      const usersBadges = data[userId]?.badges;
+      const usersBadges = userBadges[userId];
       if (!usersBadges?.length) return ret;
 
       return [
         ...usersBadges.map((badge, i) => ({
           id: `fakeprofile-${userId}-${i}`,
-          icon: badge.icon,
-          description: badge.description,
+          icon: badge.badge,
+          description: badge.tooltip,
         })),
         ...(Array.isArray(ret) ? ret : []),
       ];
@@ -248,7 +254,7 @@ export const onLoad = async () => {
 
   setInterval(async () => {
     await fetchData();
-  }, fakeProfileData?.reloadInterval);
+  }, 3600000);
 };
 
 export const onUnload = () => patches.forEach((unpatch) => unpatch());
